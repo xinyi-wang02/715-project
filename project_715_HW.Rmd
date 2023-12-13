@@ -15,18 +15,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 For our final project in BMI 715, we're diving into identifying highly correlated risk factors that contributes to the development of diabetes using the `nhanes` dataset. After pinning down the research question, we first selected a few potential predictor variables from the compiled `nhanes` data, cleaned the data and visualized the relationships between the variables. tbc 
 
-## Part 1: Research Question and Hypothesis
-### Research Question
+## Part 1: Research Question Statement
 
 We are curious to see if we can spot any specific factors that tie in closely with the development of type 2 diabetes. This idea sparked from an article by the American Heart Association (https://www.heart.org/en/health-topics/diabetes/understand-your-risk-for-diabetes), which discusses various risk factors for diabetes.
 
 We're planning to sift through the `nhanes` data, pick out variables that are likely linked to diabetes (based on what the article suggests), and then dig into the data to see if these factors do have a connection with developing diabetes by trying to predict the probabilities of developing diabetes using the variables identified. Our main question is, "Could we build an effective predictive model for diabetes risk using the variables identified from `nhanes` using the guidance from the article?" Our focus will be on improving the accuracy of the predictive model and identifying which variable could give us the best insight.
 
-### Hypothesis
-
-Our null hypothesis is that 
-
-Our alternative hypothesis is that
 
 ## Part 2: Exploratory Data Analysis (EDA)
 ### Initial selection for dependent and independent variables
