@@ -173,9 +173,14 @@ bmi_diabetes <- ggplot(df_cle, aes(x = diabetes, y = BMI)) +
   geom_boxplot() +
   labs(x = "Diabetes Status", y = "BMI") +
   theme_minimal()
+cholestrol_diabetes <- ggplot(df_cle, aes(x = diabetes, y = total_cholestrol)) +
+  geom_boxplot() +
+  labs(x = "Diabetes Status", y = "BMI") +
+  theme_minimal()
 print(age_diabetes)
 print(bp_diabetes)
 print(bmi_diabetes)
+print(cholestrol_diabetes)
 ```
 
 
