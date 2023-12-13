@@ -29,9 +29,11 @@ First, we load required libraries here.
 
 ```{r libraries}
 # Load necessary packages here
+# install.packages("corrplot") install corrplot package if haven't
 library(tidyverse)
 library(ggplot2)
 library(MASS)
+library(corrplot)
 ```
 
 ### load raw dataset and clean the data
@@ -169,7 +171,7 @@ bmi_diabetes <- ggplot(df_cle, aes(x = diabetes, y = BMI)) +
   theme_minimal()
 cholestrol_diabetes <- ggplot(df_cle, aes(x = diabetes, y = total_cholestrol)) +
   geom_boxplot() +
-  labs(x = "Diabetes Status", y = "BMI") +
+  labs(x = "Diabetes Status", y = "Total cholestrol (mg/dL)") +
   theme_minimal()
 print(age_diabetes)
 print(bp_diabetes)
@@ -180,13 +182,23 @@ print(cholestrol_diabetes)
 ### correlation matrix of predictor variables vs. response variables 
 
 ```{r correlation matrix}
-
+cont <- c("age","blood_pressure","BMI","total_cholestrol")
+cont_vars <- df_cle[, cont]
+cor_matrix_cont <- cor(cont_vars, method = "spearman")
+corrplot(cor_matrix_cont, method = "color", type = "upper", order = "hclust", 
+         tl.col = "black", tl.srt = 45, addCoef.col = "black")
 ```
 
 ### perform scaling on continuous variables 
 
 ```{r scale continuous variables}
-
+df_cle_scale <- df_cle %>% 
+  mutate(age_scale = scale(age),
+         bp_scale = scale(blood_pressure),
+         bmi_scale = scale(BMI),
+         cholestrol_scale = scale(total_cholestrol)) %>%  
+  dplyr::select(age_scale, bp_scale, bmi_scale, cholestrol_scale, family_history, race, computer_hrs, tv_hrs, diabetes)
+head(df_cle_scale)
 ```
 
 
