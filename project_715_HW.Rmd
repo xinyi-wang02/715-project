@@ -177,6 +177,18 @@ print(bmi_diabetes)
 print(cholestrol_diabetes)
 ```
 
+### correlation matrix of predictor variables vs. response variables 
+
+```{r correlation matrix}
+
+```
+
+### perform scaling on continuous variables 
+
+```{r scale continuous variables}
+
+```
+
 
 ## Part 3: Hypothesis Test
 ### 
