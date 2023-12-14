@@ -241,6 +241,8 @@ print(chi$expected)
 print(chi)
 ```
 
+Interpretation:
+
 ## Part 4: Logistics Regression Model
 ### 
  
