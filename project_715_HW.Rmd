@@ -36,7 +36,7 @@ library(MASS)
 library(corrplot)
 ```
 
-### load raw dataset and clean the data
+### Load raw dataset and clean the data
 
 We downloaded the "nhanes_13_14_subset.csv" file from Canvas, load it, and clean the data pertaining to the variables that we are interested in. The following is an initial check of the number of missing values in the outcome and predictor variables.
 
@@ -65,7 +65,7 @@ nhanes <- read.csv("nhanes_13_14_subset.csv")
 sapply(nhanes[c("MCQ300C", "RIDAGEYR", "RIDRETH3", "BPXML1", "BMXBMI", "PAQ715", "PAQ710", "LBXTC", "DIQ010")], function(x) sum(is.na(x)))
 ```
 
-### subsetting the dataframe
+### Subsetting the dataframe
 
 ```{r df with variables of interest}
 df <- nhanes[c("MCQ300C", "RIDAGEYR", "RIDRETH3", "BPXML1", "BMXBMI", "PAQ715", "PAQ710", "LBXTC", "DIQ010")]
@@ -74,7 +74,7 @@ names(df) <- c("family_history","age","race","blood_pressure","BMI","computer_hr
 head(df)
 ```
 
-### dealing with the observations with ambiguous responses, such as don't know, could not obtain, and refused
+### Dealing with the observations with ambiguous responses, such as don't know, could not obtain, and refused
 
 ```{r ambiguous rows in df}
 df_ini <- df %>% 
@@ -82,7 +82,7 @@ df_ini <- df %>%
 head(df_ini)
 ```
 
-### Adjusting values for each variable
+### Adjusting values for variables
 
 For `family_history`, `prediabetes`, and `diabetes`, recoded 2=No to 0=No.  
 Replace numbers in `race` with the indicated race.
@@ -121,13 +121,13 @@ df_cle <- df_ini %>%
 head(df_cle)
 ```
 
-### initial plot of relationships between variables
+### Initial plot of relationships between variables
 
 ```{r initial plot}
 plot(df_cle)
 ```
 
-### plots exploring relationship between variables 
+### Plots exploring relationship between variables 
 
 ```{r plots for categorical variables}
 race_diabetes <- ggplot(df_cle, aes(x = race, fill = diabetes)) +
@@ -179,7 +179,7 @@ print(bmi_diabetes)
 print(cholestrol_diabetes)
 ```
 
-### correlation matrix of predictor variables vs. response variables 
+### Correlation matrix of predictor variables vs. response variables 
 
 ```{r continuous variable correlation matrix}
 cont <- c("age","blood_pressure","BMI","total_cholestrol")
@@ -197,7 +197,7 @@ corrplot(cor_matrix_cate, method = "color", type = "upper", order = "hclust",
          tl.col = "black", tl.srt = 45, addCoef.col = "black")
 ```
 
-### perform scaling on continuous variables 
+### Perform scaling on continuous variables 
 
 ```{r scale continuous variables}
 df_cle_scale <- df_cle %>% 
@@ -211,7 +211,7 @@ head(df_cle_scale)
 
 
 ## Part 3: Hypothesis Test
-### test for statistical significance of age (contibuous variable)
+### Test for statistical significance of age (contibuous variable)
 
 From the box plot of the age distribution in each diabetes group, the age distribution aren't normal and the sample sizes between groups varies greatly from different groups. Therefore, I would use a non-parametric test that compares the different of medians among various diabetes groups. Specifically, I would use Kruskal-Wallis test because there are 3 independent groups to compare. 
 
@@ -225,7 +225,7 @@ kruskal.test(age ~ diabetes, data = df_cle)
 
 Interpretation:
 
-### test for statistical significance of family history (categorical variable)
+### Test for statistical significance of family history (categorical variable)
 
 Examined the number of cases under each category of the categorical variables, we found that whether the participants have close relatives that had diabetes was the most balanced case among all categorical variables, so we decided to conduct a statistical significance test of family history on diabetes. Since both the predictor and the response variables are categorical variables, and each cell value in the expected table is larger than 50, a Chi-squared Test was used to conduct the hypothesis test.
 
