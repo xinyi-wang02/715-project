@@ -181,11 +181,19 @@ print(cholestrol_diabetes)
 
 ### correlation matrix of predictor variables vs. response variables 
 
-```{r correlation matrix}
+```{r continuous variable correlation matrix}
 cont <- c("age","blood_pressure","BMI","total_cholestrol")
 cont_vars <- df_cle[, cont]
 cor_matrix_cont <- cor(cont_vars, method = "spearman")
 corrplot(cor_matrix_cont, method = "color", type = "upper", order = "hclust", 
+         tl.col = "black", tl.srt = 45, addCoef.col = "black")
+```
+
+```{r categorical variable correlation matrix}
+cate <- c("race","family_history","computer_hrs","tv_hrs")
+cate_vars <- df[, cate]
+cor_matrix_cate <- cor(cate_vars, method = "spearman")
+corrplot(cor_matrix_cate, method = "color", type = "upper", order = "hclust", 
          tl.col = "black", tl.srt = 45, addCoef.col = "black")
 ```
 
