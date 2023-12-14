@@ -77,9 +77,9 @@ head(df)
 ### dealing with the observations with ambiguous responses, such as don't know, could not obtain, and refused
 
 ```{r ambiguous rows in df}
-df_cle <- df %>% 
+df_ini <- df %>% 
   filter(family_history != 9, blood_pressure != 888, tv_hrs != 77, tv_hrs != 99, diabetes != 7, diabetes != 9)
-head(df_cle)
+head(df_ini)
 ```
 
 ### Adjusting values for each variable
@@ -91,7 +91,7 @@ For both variables, response 0 which suggested less than 1 hour use of computer 
 Both variables are treated as categorical variables in later analysis.
 
 ```{r value adjust for columns}
-df_cle <- df_cle %>%
+df_cle <- df_ini %>%
   mutate(
     family_history = factor(family_history, levels = c(1, 2),
                   labels = c("Yes", "No")),
@@ -191,7 +191,7 @@ corrplot(cor_matrix_cont, method = "color", type = "upper", order = "hclust",
 
 ```{r categorical variable correlation matrix}
 cate <- c("race","family_history","computer_hrs","tv_hrs")
-cate_vars <- df[, cate]
+cate_vars <- df_ini[, cate]
 cor_matrix_cate <- cor(cate_vars, method = "spearman")
 corrplot(cor_matrix_cate, method = "color", type = "upper", order = "hclust", 
          tl.col = "black", tl.srt = 45, addCoef.col = "black")
@@ -211,8 +211,17 @@ head(df_cle_scale)
 
 
 ## Part 3: Hypothesis Test
-### 
+### test for statistical significance of age (contibuous variable)
 
+From the box plot of the age distribution in each diabetes group, the age distribution aren't normal and the sample sizes between groups varies greatly from different groups. Therefore, I would use a non-parametric test that compares the different of medians among various diabetes groups. Specifically, I would use Kruskal-Wallis test because there are 3 independent groups to compare. 
+
+Null hypothesis: The median of age among test participants with diabetes, without diabetes, and borderline cases are all equal.
+
+Alternative hypothesis: At least one group's median in age is different from the other groups' medians in age among test participants with diabetes, without diabetes, and borderline cases.
+
+```{r hypothesis test for age between diabetes patients, no diabetes people, and borderline cases}
+kruskal.test(age ~ diabetes, data = df_cle)
+```
 
 ## Part 4: Logistics Regression Model
 ### 
