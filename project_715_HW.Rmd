@@ -213,11 +213,11 @@ head(df_cle_scale)
 ## Part 3: Hypothesis Test
 ### Test for statistical significance of age (contibuous variable)
 
-From the box plot of the age distribution in each diabetes group, the age distribution aren't normal and the sample sizes between groups varies greatly from different groups. Therefore, I would use a non-parametric test that compares the different of medians among various diabetes groups. Specifically, I would use Kruskal-Wallis test because there are 3 independent groups to compare. 
+From the box plot of the age distribution in each diabetes group, it is evident that the distributions do not follow a normal distribution, and the sample sizes vary significantly across the groups. Therefore, a non-parametric test is suitable for comparing the differences in medians among the various diabetes groups. Specifically, the Kruskal-Wallis test is appropriate because it is designed for comparing three or more independent groups.
 
-Null hypothesis: The median of age among test participants with diabetes, without diabetes, and borderline cases are all equal.
+Null Hypothesis (H0): The median age among test participants with diabetes, without diabetes, and with borderline cases are all equal.
 
-Alternative hypothesis: At least one group's median in age is different from the other groups' medians in age among test participants with diabetes, without diabetes, and borderline cases.
+Alternative Hypothesis (H1): At least one group's median age is different from the others among test participants with diabetes, without diabetes, and with borderline cases.
 
 ```{r hypothesis test for age between diabetes patients, no diabetes people, and borderline cases}
 kruskal.test(age ~ diabetes, data = df_cle)
