@@ -1,0 +1,313 @@
+---
+title: 'BMI 715 Final Project'
+author: "Lance Lu, Harper Wang"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Overview
+
+For our final project in BMI 715, we're diving into identifying highly correlated risk factors that contributes to the development of diabetes using the `nhanes` dataset. After pinning down the research question, we first selected a few potential predictor variables from the compiled `nhanes` data, cleaned the data and visualized the relationships between the variables. tbc 
+
+## Part 1: Research Question and Hypothesis
+### Research Question
+
+We are curious to see if we can spot any specific factors that tie in closely with the development of type 2 diabetes. This idea sparked from an article by the American Heart Association (https://www.heart.org/en/health-topics/diabetes/understand-your-risk-for-diabetes), which discusses various risk factors for diabetes.
+
+We're planning to sift through the `nhanes` data, pick out variables that are likely linked to diabetes (based on what the article suggests), and then dig into the data to see if these factors do have a connection with developing diabetes by trying to predict the probabilities of developing diabetes using the variables identified. Our main question is, "Could we build an effective predictive model for diabetes risk using the variables identified from `nhanes` using the guidance from the article?" Our focus will be on improving the accuracy of the predictive model and identifying which variable could give us the best insight.
+
+### Hypothesis
+
+Our null hypothesis is that 
+
+Our alternative hypothesis is that
+
+## Part 2: Exploratory Data Analysis (EDA)
+### Initial selection for dependent and independent variables
+
+First, we load required libraries here.
+
+```{r libraries}
+# Load necessary packages here
+library(tidyverse)
+library(ggplot2)
+library(MASS)
+```
+
+### load raw dataset and clean the data
+
+We downloaded the "nhanes_13_14_subset.csv" file from Canvas, load it, and clean the data pertaining to the variables that we are interested in. The following is an initial check of the number of missing values in the outcome and predictor variables.
+
+Variable list  
+- **MCQ300C:** Family history of diabetes in terms of the number of close relatives with diabetes: (1=Yes, 2=No, 9=Don't know)  
+- **RIDAGEYR:** Age when taking the survey (0-79=0-79 years' old, 80=80 years' old or more)  
+- **RIDRETH3:** Race: 1=Mexican American, 2=Other Hispanic, 3=Non-Hispanic White, 4=Non-Hispanic Black, 6=Non-Hispanic Asian, 7=Other Race (multi-racial included)  
+- **BPXML1:** Maximum inflation levels of blood pressure in mmHg (100-240=measured value, 888=could not obtain)  
+- **BMXBMI:** Body Mass Index (kg/m^2)  
+- **PAQ715:** Hours using computers or playing video games per day in past 30 days (0=less than 1 hour, 1-4=1-4 hours, 5=5 hours or more, 8=don't use a computer outside school)  
+- **PAQ710:** Hours watching TV or videos per day in past 30 days (0=less than 1 hour, 1-4=1-4 hours, 5=5 hours or more, 8=don't watch TV or videos, 77=refused, 99=don't know)  
+- **LBXTC:** Total cholesterol (mg/dL)  
+- **DIQ010:** Whether a doctor has diagnosed diabetes (1=Yes, 2=No, 3=Borderline, 7=Refused, 9=Don't know)  
+
+```{r load dataset and data cleaning}
+nhanes <- read.csv("nhanes_13_14_subset.csv")
+"MCQ300C" %in% names(nhanes) # family history of diabetes
+"RIDAGEYR" %in% names(nhanes) # age at survey
+"RIDRETH3" %in% names(nhanes) # race information
+"BPXML1" %in% names(nhanes) # blood pressure
+"BMXBMI" %in% names(nhanes) # BMI
+"PAQ715" %in% names(nhanes) # Hours use computer past 30 days
+"PAQ710" %in% names(nhanes) # Hours watch TV or videos past 30 days
+"LBXTC" %in% names(nhanes) # Total Cholesterol(mg/dL)
+"DIQ010" %in% names(nhanes) # Doctor told you have diabetes
+sapply(nhanes[c("MCQ300C", "RIDAGEYR", "RIDRETH3", "BPXML1", "BMXBMI", "PAQ715", "PAQ710", "LBXTC", "DIQ010")], function(x) sum(is.na(x)))
+```
+
+### subsetting the dataframe
+
+```{r df with variables of interest}
+df <- nhanes[c("MCQ300C", "RIDAGEYR", "RIDRETH3", "BPXML1", "BMXBMI", "PAQ715", "PAQ710", "LBXTC", "DIQ010")]
+df <- na.omit(df)
+names(df) <- c("family_history","age","race","blood_pressure","BMI","computer_hrs","tv_hrs","total_cholestrol","diabetes")
+head(df)
+```
+
+### dealing with the observations with ambiguous responses, such as don't know, could not obtain, and refused
+
+```{r ambiguous rows in df}
+df_cle <- df %>% 
+  filter(family_history != 9, blood_pressure != 888, tv_hrs != 77, tv_hrs != 99, diabetes != 7, diabetes != 9)
+head(df_cle)
+```
+
+### Adjusting values for each variable
+
+For `family_history`, `prediabetes`, and `diabetes`, recoded 2=No to 0=No.  
+Replace numbers in `race` with the indicated race.
+Since a response 8 in `computer_use_hrs` and `tv_hrs` means that the participant doesn't use computer or watch TV outside school or work, we find it counter intuitive and misleading when interpreting the relationship between these two variables and the response variable, we decide to modify the values as the following:
+For both variables, response 0 which suggested less than 1 hour use of computer or TV would be converted to 1, and the response 1 now represents that the participant uses computer or TV for 1 hour or less per day. Response 8 which suggested no use of computer or TV outside of school or work would be converted to 0 that now represents no use of computer or TV outside school or work.
+Both variables are treated as categorical variables in later analysis.
+
+```{r value adjust for columns}
+df_cle <- df_cle %>%
+  mutate(
+    family_history = factor(family_history, levels = c(1, 2),
+                  labels = c("Yes", "No")),
+  race = factor(race, levels = c(1, 2, 3, 4, 6, 7),
+                  labels = c("Mexican American", "Other Hispanic", "White", "Black", "Asian", "Other")),
+  diabetes = factor(diabetes, levels = c(1, 2, 3),
+                  labels = c("Yes", "No", "Borderline")),
+  computer_hrs = case_when(
+    computer_hrs == 0 ~ 1,
+    computer_hrs == 8 ~ 0,
+    TRUE ~ computer_hrs
+  ),
+  tv_hrs = case_when(
+    tv_hrs == 0 ~ 1,
+    tv_hrs == 8 ~ 0,
+    TRUE ~ tv_hrs
+  )) %>% 
+  mutate(
+    computer_hrs = factor(computer_hrs,
+      levels = c(0, 1, 2, 3, 4, 5),
+      labels = c("0", "<= 1", "2", "3", "4", ">= 5")
+    ),
+    tv_hrs = factor(tv_hrs,
+      levels = c(0, 1, 2, 3, 4, 5),
+      labels = c("0", "<= 1", "2", "3", "4", ">= 5")
+    ))
+head(df_cle)
+```
+
+```{r}
+table(df_cle$diabetes, useNA = 'always')
+```
+
+
+### initial plot of relationships between variables
+
+```{r initial plot}
+plot(df_cle)
+```
+
+### plots exploring relationship between variables 
+
+```{r plots for categorical variables}
+race_diabetes <- ggplot(df_cle, aes(x = race, fill = diabetes)) +
+  geom_bar(position = "dodge") +
+  labs(x = "Race", y = "Count", fill = "Diabetes Status") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+fam_diabetes <- ggplot(df_cle, aes(x = family_history, fill = diabetes)) +
+  geom_bar(position = "dodge") +
+  labs(x = "Whether close relative has diabetes", y = "Count", fill = "Diabetes Status") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+comp_diabetes <- ggplot(df_cle, aes(x = computer_hrs, fill = diabetes)) +
+  geom_bar(position = "dodge") +
+  labs(x = "Time using computers or playing video games per day (hours)", y = "Count", fill = "Diabetes Status") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+tv_diabetes <- ggplot(df_cle, aes(x = tv_hrs, fill = diabetes)) +
+  geom_bar(position = "dodge") +
+  labs(x = "Time watching TV or videos per day (hours)", y = "Count", fill = "Diabetes Status") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+print(race_diabetes)
+print(fam_diabetes)
+print(comp_diabetes)
+print(tv_diabetes)
+```
+
+```{r plots for continuous variables}
+age_diabetes <- ggplot(df_cle, aes(x = diabetes, y = age)) +
+  geom_boxplot() +
+  labs(x = "Diabetes Status", y = "Age Distribution") +
+  theme_minimal()
+bp_diabetes <- ggplot(df_cle, aes(x = diabetes, y = blood_pressure)) +
+  geom_boxplot() +
+  labs(x = "Diabetes Status", y = "Blood Pressure Distribution (mmHg)") +
+  theme_minimal()
+bmi_diabetes <- ggplot(df_cle, aes(x = diabetes, y = BMI)) +
+  geom_boxplot() +
+  labs(x = "Diabetes Status", y = "BMI") +
+  theme_minimal()
+print(age_diabetes)
+print(bp_diabetes)
+print(bmi_diabetes)
+```
+
+
+## Part 3: Hypothesis Test
+### 
+
+
+## Part 4: Choose Model -- Multinomial Logistics Regression
+
+```{r,include=FALSE}
+options(repos = c(CRAN = "https://cran.r-project.org/"))
+install.packages("nnet")
+install.packages("caret")
+library(caret)
+library(nnet)
+library(randomForest)
+library(MASS)
+library(pROC)
+```
+
+## Run Model -- Multinomial Logistics Regression with stepwise AIC
+```{r}
+set.seed(715) 
+train_amount <- sample(1:nrow(df_cle), size = 0.7 * nrow(df_cle))
+train_data <- df_cle[train_amount, ]
+test_data <- df_cle[-train_amount, ]
+```
+
+```{r,include=FALSE}
+full_model <- multinom(diabetes ~ ., data = train_data)
+null_model <- multinom(diabetes ~ 1, data = train_data)
+stepwise_model <- stepAIC(null_model, scope = list(lower = null_model, upper = full_model), 
+                          direction = "both", trace = FALSE)
+```
+
+```{r}
+summary(stepwise_model)
+```
+
+```{r}
+stepwise_predictions <- predict(stepwise_model, newdata = test_data, type = "class")
+confusionMatrix(stepwise_predictions, test_data$diabetes)
+```
+
+#### ROC-AUC for Evalation
+```{r}
+stepwise_predict_prob <- predict(stepwise_model, newdata = test_data, type = "prob")
+
+roc_results <- lapply(levels(test_data$diabetes), function(class) {
+  roc(response = as.numeric(test_data$diabetes == class), predictor = stepwise_predict_prob[, class])
+})
+
+colors <- c("blue", "red", "green") 
+plot(roc_results[[1]], main="ROC Curves for Unbalanced Logistic + Stepwise AIC", col=colors[1], print.auc=TRUE)
+
+for (i in 2:length(roc_results)) {
+  plot(roc_results[[i]], add=TRUE, col=colors[i], print.auc=TRUE, print.auc.x=0.5, print.auc.y=.5-(i-1)/10)
+}
+
+legend("bottomright", levels(test_data$diabetes), col=colors, lwd=2)
+```
+
+
+## Part 5: Model Fit Evaluation and Comparison
+
+### Alternative Model 1: Multinomial Logistics Regression + Stepwise AIC + Oversampled Data
+
+```{r}
+table(train_data$diabetes, useNA = 'always')
+```
+
+```{r,include=FALSE}
+set.seed(715)
+borderline_data <- train_data[train_data$diabetes == "Borderline", ]
+oversampled_data <- borderline_data[sample(1:nrow(borderline_data), replace = TRUE, size = 200), ]  # Adjust size as needed
+
+train_data_balanced <- rbind(train_data, oversampled_data)
+full_model_balanced <- multinom(diabetes ~ ., data = train_data_balanced)
+null_model_balanced <- multinom(diabetes ~ 1, data = train_data_balanced)
+
+stepwise_model_balanced <- stepAIC(null_model_balanced, scope = list(lower = null_model_balanced, upper = full_model_balanced), 
+                                   direction = "both", trace = FALSE)
+```
+
+```{r}
+predictions_balanced <- predict(stepwise_model_balanced, newdata = test_data, type = "class")
+confusionMatrix(predictions_balanced, test_data$diabetes)
+```
+
+#### ROC-AUC for Evalation
+```{r}
+predictions_balanced_prob <- predict(stepwise_model_balanced, newdata = test_data, type = "prob")
+roc_results <- lapply(levels(test_data$diabetes), function(class) {
+  roc(response = as.numeric(test_data$diabetes == class), predictor = predictions_balanced_prob[, class])
+})
+colors <- c("blue", "red", "green") 
+plot(roc_results[[1]], main="ROC Curves for Balanced Logistic + Stepwise AIC", col=colors[1], print.auc=TRUE)
+for (i in 2:length(roc_results)) {
+  plot(roc_results[[i]], add=TRUE, col=colors[i], print.auc=TRUE, print.auc.x=0.5, print.auc.y=.5-(i-1)/10)
+}
+legend("bottomright", levels(test_data$diabetes), col=colors, lwd=2)
+```
+
+### Alternative Model 2: Random Forest
+```{r}
+set.seed(715)
+forest <- randomForest(diabetes ~ ., data = train_data, ntree = 500)
+forest_predictions <- predict(forest, test_data)
+confusionMatrix(forest_predictions, test_data$diabetes)
+```
+
+#### ROC-AUC for Evalation
+```{r}
+forest_prob_predictions <- predict(forest, test_data, type = "prob")
+
+roc_results <- lapply(levels(test_data$diabetes), function(class) {
+  roc(response = as.numeric(test_data$diabetes == class), predictor = forest_prob_predictions[, class])
+})
+colors <- c("blue", "red", "green") 
+plot(roc_results[[1]], main="ROC Curves for Random Forest Model", col=colors[1],print.auc=TRUE)
+for (i in 2:length(roc_results)) {
+  plot(roc_results[[i]], add=TRUE, col=colors[i], print.auc=TRUE, print.auc.x=0.5, print.auc.y=.5-(i-1)/10)
+}
+legend("bottomright", levels(test_data$diabetes), col=colors, lwd=2)
+```
+
+
+## Part 6: Follow-up Analysis
+###
+
