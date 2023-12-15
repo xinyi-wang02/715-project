@@ -79,7 +79,7 @@ head(df)
 ```{r ambiguous rows in df}
 df_ini <- df %>% 
   filter(family_history != 9, blood_pressure != 888, tv_hrs != 77, tv_hrs != 99, diabetes != 7, diabetes != 9)
-head(df_ini)
+head(df_ini) # drops the observations with ambiguous response
 ```
 
 ### Adjusting values for variables
@@ -93,66 +93,71 @@ Both variables are treated as categorical variables in later analysis.
 df_cle <- df_ini %>%
   mutate(
     family_history = factor(family_history, levels = c(1, 2),
-                  labels = c("Yes", "No")),
-  race = factor(race, levels = c(1, 2, 3, 4, 6, 7),
+                  labels = c("Yes", "No")), # encode family_history as factors
+  race = factor(race, levels = c(1, 2, 3, 4, 6, 7), # encode race as factors
                   labels = c("Mexican American", "Other Hispanic", "White", "Black", "Asian", "Other")),
-  diabetes = factor(diabetes, levels = c(1, 2, 3),
+  diabetes = factor(diabetes, levels = c(1, 2, 3), # encode diabetes as factors
                   labels = c("Yes", "No", "Borderline")),
   computer_hrs = case_when(
     computer_hrs == 0 ~ 1,
     computer_hrs == 8 ~ 0,
     TRUE ~ computer_hrs
-  ),
+  ), # adjust values for compute_hrs
   tv_hrs = case_when(
     tv_hrs == 0 ~ 1,
     tv_hrs == 8 ~ 0,
     TRUE ~ tv_hrs
-  )) %>% 
+  )) %>% # adjust values for tv_hrs
   mutate(
     computer_hrs = factor(computer_hrs,
       levels = c(0, 1, 2, 3, 4, 5),
       labels = c("0", "<= 1", "2", "3", "4", ">= 5")
-    ),
+    ), # encode computer_hrs as factors
     tv_hrs = factor(tv_hrs,
       levels = c(0, 1, 2, 3, 4, 5),
       labels = c("0", "<= 1", "2", "3", "4", ">= 5")
-    ))
+    )) # encode tv_hrs as factors
 head(df_cle)
 ```
 
 ### Initial plot of relationships between variables
 
 ```{r initial plot}
-plot(df_cle)
+plot(df_cle) # initial plot
 ```
 
 ### Plots exploring relationship between variables 
 
 ```{r plots for categorical variables}
+# bar plot for race and diabetes
 race_diabetes <- ggplot(df_cle, aes(x = race, fill = diabetes)) +
   geom_bar(position = "dodge") +
   labs(x = "Race", y = "Count", fill = "Diabetes Status", 
        title = "The relationship between diabetes status and race") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+# bar plot for family_history and diabetes
 fam_diabetes <- ggplot(df_cle, aes(x = family_history, fill = diabetes)) +
   geom_bar(position = "dodge") +
   labs(x = "Whether close relative has diabetes", y = "Count", fill = "Diabetes Status", 
        title = "The relationship between diabetes status and family history") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+# bar plot for computer_hrs and diabetes
 comp_diabetes <- ggplot(df_cle, aes(x = computer_hrs, fill = diabetes)) +
   geom_bar(position = "dodge") +
   labs(x = "Time using computers or playing video games per day (hours)", y = "Count", fill = "Diabetes Status", 
        title = "The relationship between diabetes status and computer use hours per day") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+# bar plot for tv_hrs and diabetes
 tv_diabetes <- ggplot(df_cle, aes(x = tv_hrs, fill = diabetes)) +
   geom_bar(position = "dodge") +
   labs(x = "Time watching TV or videos per day (hours)", y = "Count", fill = "Diabetes Status", 
        title = "The relationship between diabetes status and TV hours per day") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+# display plots
 print(race_diabetes)
 print(fam_diabetes)
 print(comp_diabetes)
@@ -160,26 +165,31 @@ print(tv_diabetes)
 ```
 
 ```{r plots for continuous variables}
+# box plot for age and diabetes
 age_diabetes <- ggplot(df_cle, aes(x = diabetes, y = age)) +
   geom_boxplot() +
   labs(x = "Diabetes Status", y = "Age Distribution", 
        title = "The relationship between diabetes status and age") +
   theme_minimal()
+# box plot for blood_pressure and diabetes
 bp_diabetes <- ggplot(df_cle, aes(x = diabetes, y = blood_pressure)) +
   geom_boxplot() +
   labs(x = "Diabetes Status", y = "Blood Pressure Distribution (mmHg)", 
        title = "The relationship between diabetes status and blood pressure") +
   theme_minimal()
+# box plot for BMI and diabetes
 bmi_diabetes <- ggplot(df_cle, aes(x = diabetes, y = BMI)) +
   geom_boxplot() +
   labs(x = "Diabetes Status", y = "BMI", 
        title = "The relationship between diabetes status and BMI") +
   theme_minimal()
+# box plot for total_cholestrol and diabetes
 cholestrol_diabetes <- ggplot(df_cle, aes(x = diabetes, y = total_cholestrol)) +
   geom_boxplot() +
   labs(x = "Diabetes Status", y = "Total cholestrol (mg/dL)", 
        title = "The relationship between diabetes status and total cholestrol level") +
   theme_minimal()
+# display plots
 print(age_diabetes)
 print(bp_diabetes)
 print(bmi_diabetes)
@@ -189,6 +199,7 @@ print(cholestrol_diabetes)
 ### Correlation matrix of predictor variables vs. response variables 
 
 ```{r continuous variable correlation matrix}
+# correlation matrix plot for continous variables
 cont <- c("age","blood_pressure","BMI","total_cholestrol")
 cont_vars <- df_cle[, cont]
 cor_matrix_cont <- cor(cont_vars, method = "spearman")
@@ -197,6 +208,7 @@ corrplot(cor_matrix_cont, method = "color", type = "upper", order = "hclust",
 ```
 
 ```{r categorical variable correlation matrix}
+# correlation matrix plot for categorical variables
 cate <- c("race","family_history","computer_hrs","tv_hrs")
 cate_vars <- df_ini[, cate]
 cor_matrix_cate <- cor(cate_vars, method = "spearman")
@@ -207,6 +219,7 @@ corrplot(cor_matrix_cate, method = "color", type = "upper", order = "hclust",
 ### Perform scaling on continuous variables 
 
 ```{r scale continuous variables}
+# scale the continuous variables
 df_cle_scale <- df_cle %>% 
   mutate(age_scale = scale(age),
          bp_scale = scale(blood_pressure),
@@ -227,6 +240,17 @@ Null Hypothesis $(H_0)$: The median age among test participants with diabetes, w
 Alternative Hypothesis $(H_1)$: At least one group's median age is different from the others among test participants with diabetes, without diabetes, and with borderline cases.
 
 ```{r hypothesis test for age between diabetes patients, no diabetes people, and borderline cases}
+# checking the age distribution in each diabetes groups
+diabetes_part <- subset(df_cle, diabetes == "Yes")
+dia_age <- hist(diabetes_part$age)
+no_diabetes_part <- subset(df_cle, diabetes == "No")
+no_dia_age <- hist(no_diabetes_part$age)
+borderline_diabetes_part <- subset(df_cle, diabetes == "Borderline")
+bor_age <- hist(borderline_diabetes_part$age)
+print(dia_age)
+print(no_dia_age)
+print(bor_age)
+# applying the kruskal test
 kruskal.test(age ~ diabetes, data = df_cle)
 ```
 
@@ -250,6 +274,7 @@ Alternative hypothesis $(H_1)$: Family history does affect the proportion of ind
 
 
 ```{r hypothesis test for family history between diabetes patients, no diabetes people, and borderline cases}
+# displaying the contingency table and conducting the chi-squared test 
 contingency <- table(df_cle$family_history, df_cle$diabetes)
 chi <- chisq.test(contingency)
 print(chi$expected)
