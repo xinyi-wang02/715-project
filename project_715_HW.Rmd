@@ -84,7 +84,6 @@ head(df_ini)
 
 ### Adjusting values for variables
 
-For `family_history`, `prediabetes`, and `diabetes`, recoded 2=No to 0=No.  
 Replace numbers in `race` with the indicated race.
 Since a response 8 in `computer_use_hrs` and `tv_hrs` means that the participant doesn't use computer or watch TV outside school or work, we find it counter intuitive and misleading when interpreting the relationship between these two variables and the response variable, we decide to modify the values as the following:
 For both variables, response 0 which suggested less than 1 hour use of computer or TV would be converted to 1, and the response 1 now represents that the participant uses computer or TV for 1 hour or less per day. Response 8 which suggested no use of computer or TV outside of school or work would be converted to 0 that now represents no use of computer or TV outside school or work.
