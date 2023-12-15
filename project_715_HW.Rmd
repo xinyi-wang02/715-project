@@ -131,22 +131,26 @@ plot(df_cle)
 ```{r plots for categorical variables}
 race_diabetes <- ggplot(df_cle, aes(x = race, fill = diabetes)) +
   geom_bar(position = "dodge") +
-  labs(x = "Race", y = "Count", fill = "Diabetes Status") +
+  labs(x = "Race", y = "Count", fill = "Diabetes Status", 
+       title = "The relationship between diabetes status and race") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 fam_diabetes <- ggplot(df_cle, aes(x = family_history, fill = diabetes)) +
   geom_bar(position = "dodge") +
-  labs(x = "Whether close relative has diabetes", y = "Count", fill = "Diabetes Status") +
+  labs(x = "Whether close relative has diabetes", y = "Count", fill = "Diabetes Status", 
+       title = "The relationship between diabetes status and family history") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 comp_diabetes <- ggplot(df_cle, aes(x = computer_hrs, fill = diabetes)) +
   geom_bar(position = "dodge") +
-  labs(x = "Time using computers or playing video games per day (hours)", y = "Count", fill = "Diabetes Status") +
+  labs(x = "Time using computers or playing video games per day (hours)", y = "Count", fill = "Diabetes Status", 
+       title = "The relationship between diabetes status and computer use hours per day") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 tv_diabetes <- ggplot(df_cle, aes(x = tv_hrs, fill = diabetes)) +
   geom_bar(position = "dodge") +
-  labs(x = "Time watching TV or videos per day (hours)", y = "Count", fill = "Diabetes Status") +
+  labs(x = "Time watching TV or videos per day (hours)", y = "Count", fill = "Diabetes Status", 
+       title = "The relationship between diabetes status and TV hours per day") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 print(race_diabetes)
@@ -158,19 +162,23 @@ print(tv_diabetes)
 ```{r plots for continuous variables}
 age_diabetes <- ggplot(df_cle, aes(x = diabetes, y = age)) +
   geom_boxplot() +
-  labs(x = "Diabetes Status", y = "Age Distribution") +
+  labs(x = "Diabetes Status", y = "Age Distribution", 
+       title = "The relationship between diabetes status and age") +
   theme_minimal()
 bp_diabetes <- ggplot(df_cle, aes(x = diabetes, y = blood_pressure)) +
   geom_boxplot() +
-  labs(x = "Diabetes Status", y = "Blood Pressure Distribution (mmHg)") +
+  labs(x = "Diabetes Status", y = "Blood Pressure Distribution (mmHg)", 
+       title = "The relationship between diabetes status and blood pressure") +
   theme_minimal()
 bmi_diabetes <- ggplot(df_cle, aes(x = diabetes, y = BMI)) +
   geom_boxplot() +
-  labs(x = "Diabetes Status", y = "BMI") +
+  labs(x = "Diabetes Status", y = "BMI", 
+       title = "The relationship between diabetes status and BMI") +
   theme_minimal()
 cholestrol_diabetes <- ggplot(df_cle, aes(x = diabetes, y = total_cholestrol)) +
   geom_boxplot() +
-  labs(x = "Diabetes Status", y = "Total cholestrol (mg/dL)") +
+  labs(x = "Diabetes Status", y = "Total cholestrol (mg/dL)", 
+       title = "The relationship between diabetes status and total cholestrol level") +
   theme_minimal()
 print(age_diabetes)
 print(bp_diabetes)
