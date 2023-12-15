@@ -254,7 +254,7 @@ print(bor_age)
 kruskal.test(age ~ diabetes, data = df_cle)
 ```
 
-Interpretation:
+Interpretation: See write-up for details
 
 ## Part 4: Logistics Regression Model
 ### 
@@ -281,4 +281,4 @@ print(chi$expected)
 print(chi)
 ```
 
-Interpretation:
+Interpretation: See write-up for details
