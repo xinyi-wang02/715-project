@@ -215,30 +215,12 @@ head(df_cle_scale)
 
 From the box plot of the age distribution in each diabetes group, it is evident that the distributions do not follow a normal distribution, and the sample sizes vary significantly across the groups. Therefore, a non-parametric test is suitable for comparing the differences in medians among the various diabetes groups. Specifically, the Kruskal-Wallis test is appropriate because it is designed for comparing three or more independent groups.
 
-Null Hypothesis (H0): The median age among test participants with diabetes, without diabetes, and with borderline cases are all equal.
+Null Hypothesis $(H_0)$: The median age among test participants with diabetes, without diabetes, and with borderline cases are all equal.
 
-Alternative Hypothesis (H1): At least one group's median age is different from the others among test participants with diabetes, without diabetes, and with borderline cases.
+Alternative Hypothesis $(H_1)$: At least one group's median age is different from the others among test participants with diabetes, without diabetes, and with borderline cases.
 
 ```{r hypothesis test for age between diabetes patients, no diabetes people, and borderline cases}
 kruskal.test(age ~ diabetes, data = df_cle)
-```
-
-Interpretation:
-
-### Test for statistical significance of family history (categorical variable)
-
-Examined the number of cases under each category of the categorical variables, we found that whether the participants have close relatives that had diabetes was the most balanced case among all categorical variables, so we decided to conduct a statistical significance test of family history on diabetes. Since both the predictor and the response variables are categorical variables, and each cell value in the expected table is larger than 50, a Chi-squared Test was used to conduct the hypothesis test.
-
-Null hypothesis: Family history does not affect the proportion of participants in each diabetes status category.
-
-Alternative hypothesis: Family history does affect the proportion of individuals in each diabetes status category, such that there are more (or fewer) participants with diabetes, no diabetes, or borderline within the groups defined by family history than would be expected by random chance.
-
-
-```{r hypothesis test for family history between diabetes patients, no diabetes people, and borderline cases}
-contingency <- table(df_cle$family_history, df_cle$diabetes)
-chi <- chisq.test(contingency)
-print(chi$expected)
-print(chi)
 ```
 
 Interpretation:
@@ -251,5 +233,20 @@ Interpretation:
 ###
 
 ## Part 6: Follow-up Analysis
-###
+### Test for statistical significance of family history (categorical variable)
 
+Examined the number of cases under each category of the categorical variables, we found that whether the participants have close relatives that had diabetes was the most balanced case among all categorical variables, so we decided to conduct a statistical significance test of family history on diabetes. Since both the predictor and the response variables are categorical variables, and each cell value in the expected table is larger than 50, a Chi-squared Test was used to conduct the hypothesis test.
+
+Null hypothesis $(H_0)$: Family history does not affect the proportion of participants in each diabetes status category.
+
+Alternative hypothesis $(H_1)$: Family history does affect the proportion of individuals in each diabetes status category, such that there are more (or fewer) participants with diabetes, no diabetes, or borderline within the groups defined by family history than would be expected by random chance.
+
+
+```{r hypothesis test for family history between diabetes patients, no diabetes people, and borderline cases}
+contingency <- table(df_cle$family_history, df_cle$diabetes)
+chi <- chisq.test(contingency)
+print(chi$expected)
+print(chi)
+```
+
+Interpretation:
