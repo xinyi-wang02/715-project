@@ -218,7 +218,7 @@ head(df_cle_scale)
 
 
 ## Part 3: Hypothesis Test
-### Test for statistical significance of age (contibuous variable)
+### Test for statistical significance of age (continuous variable)
 
 From the box plot of the age distribution in each diabetes group, it is evident that the distributions do not follow a normal distribution, and the sample sizes vary significantly across the groups. Therefore, a non-parametric test is suitable for comparing the differences in medians among the various diabetes groups. Specifically, the Kruskal-Wallis test is appropriate because it is designed for comparing three or more independent groups.
 
